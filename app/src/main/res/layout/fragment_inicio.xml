@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".fragments.Inicio">
+
+    <!-- TODO: Update blank fragment layout -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/inicio_filter">
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/inicio_provincia"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
+            android:layout_width="100dp"
+            android:layout_height="wrap_content"
+            android:hint="Provincia"
+            app:layout_constraintEnd_toStartOf="@+id/inicio_canton"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:layout_width="match_parent"
+                android:singleLine="true"
+                android:layout_height="wrap_content" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/inicio_canton"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
+            android:layout_width="100dp"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@id/inicio_provincia"
+            android:hint="Cantón"
+            app:layout_constraintEnd_toStartOf="@+id/inicio_distrito"
+            app:layout_constraintStart_toEndOf="@+id/inicio_provincia"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:layout_width="match_parent"
+                android:singleLine="true"
+                android:layout_height="wrap_content" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/inicio_distrito"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
+            android:layout_width="100dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="25dp"
+            android:layout_toRightOf="@id/inicio_canton"
+            android:hint="Distrito"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/inicio_canton"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                android:layout_width="match_parent"
+                android:layout_height="50dp"/>
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <Button
+            android:id="@+id/inicio_buscar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/inicio_provincia"
+            android:layout_centerInParent="true"
+            android:layout_marginHorizontal="25dp"
+            android:layout_marginTop="10dp"
+            android:text="Buscar"
+            android:textAllCaps="false"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/inicio_canton" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/inicio_filter" />
+
+
+</RelativeLayout>

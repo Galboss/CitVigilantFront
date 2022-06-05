@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item android:title="Inicio"
+        android:icon="@drawable/ic_baseline_home_24"
+        android:id="@+id/menu_inicio"/>
+    <item android:title="Buscar"
+        android:icon="@drawable/ic_baseline_search_24"
+        android:id="@+id/menu_buscar"/>
+    <item android:title="Crear"
+        android:icon="@drawable/ic_baseline_post_add_24"
+        android:id="@+id/menu_agregar"/>
+    <item android:title="Perfil"
+        android:icon="@drawable/ic_baseline_person_24"
+        android:id="@+id/menu_perfil"/>
+    <item android:title="Acerca"
+        android:icon="@drawable/ic_baseline_info_24"
+        android:id="@+id/menu_acerca"/>
+</menu>

@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:context=".fragments.Perfil"
+        android:overScrollMode="always">
+
+
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/perfil_imagen"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            tools:src="@tools:sample/avatars"
+            android:layout_marginTop="5dp"
+            app:shapeAppearanceOverlay="@style/RoundedSquare"
+            app:strokeColor="@color/purple_500"
+            app:strokeWidth="2dp"/>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/perfil_nombre"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Nombre de Usuario"
+            android:layout_below="@id/perfil_imagen"
+            android:layout_marginHorizontal="10dp"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:singleLine="true" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/perfil_email"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Email"
+            android:layout_below="@id/perfil_nombre"
+            android:layout_marginHorizontal="10dp"
+
+            app:layout_constraintTop_toTopOf="parent">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:singleLine="true" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/perfil_password"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Contraseña"
+            android:layout_below="@id/perfil_email"
+            android:layout_marginHorizontal="10dp"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:singleLine="true"
+                android:inputType="textPassword"/>
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/perfil_newpassword"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Nueva Contraseña"
+            android:layout_below="@id/perfil_password"
+            android:layout_marginHorizontal="10dp"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:singleLine="true"
+                android:inputType="textPassword"/>
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/perfil_confirmpassword"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Confirme su nueva contraseña"
+            android:layout_below="@id/perfil_newpassword"
+            android:layout_marginHorizontal="10dp"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:singleLine="true"
+                android:inputType="textPassword"/>
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <Button
+            android:id="@+id/perfil_actualizar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAllCaps="false"
+            android:layout_below="@id/perfil_confirmpassword"
+            android:layout_marginHorizontal="10dp"
+            android:layout_marginTop="10dp"
+            android:text="Actualizar Perfil" />
+        <Button
+            android:id="@+id/perfil_vermisarticulos"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAllCaps="false"
+            android:layout_below="@id/perfil_actualizar"
+            android:layout_marginHorizontal="10dp"
+            android:layout_marginTop="10dp"
+            android:text="Ver Mis Artículos Publicados" />
+        <Button
+            android:id="@+id/perfil_cambiarFoto"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAllCaps="false"
+            android:layout_below="@id/perfil_vermisarticulos"
+            android:layout_marginHorizontal="10dp"
+            android:layout_marginTop="10dp"
+            android:text="Cambiar Foto de Perfíl" />
+        <Button
+            android:id="@+id/perfil_enviarFoto"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAllCaps="false"
+            android:layout_below="@id/perfil_cambiarFoto"
+            android:layout_marginHorizontal="10dp"
+            android:layout_marginTop="10dp"
+            android:text="Subir Foto" />
+        <Button
+            android:id="@+id/perfil_cerrarSesion"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAllCaps="false"
+            android:layout_below="@id/perfil_enviarFoto"
+            android:layout_marginHorizontal="10dp"
+            android:layout_marginTop="10dp"
+            android:text="Cerrar Sesion"
+            android:layout_marginBottom="60dp"/>
+
+    </RelativeLayout>
+
+</ScrollView>
