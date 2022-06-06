@@ -1,128 +1,136 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".fragments.Crear">
 
-    <TextView
-        android:id="@+id/crear_tituloFrag"
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textSize="25dp"
-        android:layout_marginStart="10dp"
-        android:text="Crear nueva denuncia" />
+        android:layout_height="match_parent"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        tools:context=".fragments.Crear">
 
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/crear_tituloArticulo"
-        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/crear_tituloFrag"
-        android:hint="Título del artículo"
-        android:layout_marginHorizontal="10dp">
-
-        <com.google.android.material.textfield.TextInputEditText
+        <TextView
+            android:id="@+id/crear_tituloFrag"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:singleLine="true"
-            android:inputType="text"/>
-    </com.google.android.material.textfield.TextInputLayout>
+            android:textSize="25dp"
+            android:layout_marginStart="10dp"
+            android:text="Crear nueva denuncia" />
 
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/crear_contenido"
-        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/crear_tituloArticulo"
-        android:layout_marginHorizontal="10dp"
-        android:hint="Descripción"
-        app:counterEnabled="true"
-        app:counterMaxLength="500">
-
-        <com.google.android.material.textfield.TextInputEditText
-            android:layout_width="match_parent"
-            android:layout_height="250dp"
-            android:inputType="textMultiLine"
-            android:gravity="top"
-            android:singleLine="true"
-            android:maxLength="500"
-            android:verticalScrollbarPosition="defaultPosition"
-            />
-    </com.google.android.material.textfield.TextInputLayout>
-
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/crear_provincia"
-        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/crear_contenido"
-        android:hint="Provincia"
-        android:layout_marginHorizontal="10dp">
-
-        <com.google.android.material.textfield.TextInputEditText
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/crear_tituloArticulo"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:singleLine="true"
-            android:inputType="text"/>
-    </com.google.android.material.textfield.TextInputLayout>
+            android:layout_below="@id/crear_tituloFrag"
+            android:hint="Título del artículo"
+            android:layout_marginHorizontal="10dp">
 
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/crear_canton"
-        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/crear_provincia"
-        android:hint="Cantón"
-        android:layout_marginHorizontal="10dp">
+            <com.google.android.material.textfield.TextInputEditText
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:singleLine="true"
+                android:inputType="text"/>
+        </com.google.android.material.textfield.TextInputLayout>
 
-        <com.google.android.material.textfield.TextInputEditText
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/crear_contenido"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:singleLine="true"
-            android:inputType="text"/>
-    </com.google.android.material.textfield.TextInputLayout>
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/crear_distrito"
-        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/crear_canton"
-        android:hint="Distrito"
-        android:layout_marginHorizontal="10dp">
+            android:layout_below="@id/crear_tituloArticulo"
+            android:layout_marginHorizontal="10dp"
+            android:hint="Descripción"
+            app:counterEnabled="true"
+            app:counterMaxLength="500">
 
-        <com.google.android.material.textfield.TextInputEditText
+            <com.google.android.material.textfield.TextInputEditText
+                android:layout_width="match_parent"
+                android:layout_height="250dp"
+                android:inputType="textMultiLine"
+                android:gravity="top"
+                android:singleLine="true"
+                android:maxLength="500"
+                android:verticalScrollbarPosition="defaultPosition"
+                />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/crear_provincia"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:singleLine="true"
-            android:inputType="text"/>
-    </com.google.android.material.textfield.TextInputLayout>
+            android:layout_below="@id/crear_contenido"
+            android:hint="Provincia"
+            android:layout_marginHorizontal="10dp">
 
-    <Button
-        android:id="@+id/button_chooseImages"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/crear_distrito"
-        android:layout_marginHorizontal="10dp"
-        android:text="Adjuntar Imagenes"
-        android:textAllCaps="false" />
+            <com.google.android.material.textfield.TextInputEditText
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:singleLine="true"
+                android:inputType="text"/>
+        </com.google.android.material.textfield.TextInputLayout>
 
-    <TextView
-        android:id="@+id/textview_paths"
-        android:layout_width="match_parent"
-        android:layout_below="@id/button_chooseImages"
-        android:layout_height="wrap_content"
-        android:text="" />
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/crear_canton"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/crear_provincia"
+            android:hint="Cantón"
+            android:layout_marginHorizontal="10dp">
 
-    <Button
-        android:id="@+id/button_publicar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginHorizontal="10dp"
-        android:textAllCaps="false"
-        android:layout_below="@id/textview_paths"
-        android:text="Publicar Artículo" />
+            <com.google.android.material.textfield.TextInputEditText
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:singleLine="true"
+                android:inputType="text"/>
+        </com.google.android.material.textfield.TextInputLayout>
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/crear_distrito"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/crear_canton"
+            android:hint="Distrito"
+            android:layout_marginHorizontal="10dp">
 
+            <com.google.android.material.textfield.TextInputEditText
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:singleLine="true"
+                android:inputType="text"/>
+        </com.google.android.material.textfield.TextInputLayout>
 
-</RelativeLayout>
+        <Button
+            android:id="@+id/button_chooseImages"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/crear_distrito"
+            android:layout_marginHorizontal="10dp"
+            android:text="Adjuntar Imagenes"
+            android:textAllCaps="false" />
+
+        <TextView
+            android:id="@+id/textview_paths"
+            android:layout_width="match_parent"
+            android:layout_below="@id/button_chooseImages"
+            android:layout_height="wrap_content"
+            android:text="" />
+
+        <Button
+            android:id="@+id/button_publicar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="10dp"
+            android:textAllCaps="false"
+            android:layout_below="@id/textview_paths"
+            android:text="Publicar Artículo" />
+
+    </RelativeLayout>
+
+</ScrollView>

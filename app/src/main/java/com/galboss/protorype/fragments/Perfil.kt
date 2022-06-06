@@ -1,28 +1,35 @@
 package com.galboss.protorype.fragments
 
+import android.annotation.SuppressLint
+import android.app.Activity
+import android.app.Activity.RESULT_OK
 import android.content.Context
+import android.content.Intent
+import android.database.Cursor
+import android.net.Uri
 import android.os.Bundle
+import android.provider.MediaStore
 import android.util.Log
-import android.util.Log.INFO
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.result.ActivityResult
+import androidx.activity.result.ActivityResultCallback
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
-import com.galboss.protorype.R
-import com.galboss.protorype.fragments.viewModels.PerfilViewModel
-import com.galboss.protorype.task.CoroutinesAsyncTask
-import com.galboss.protorype.task.httpRequestGet
-import com.galboss.protorype.task.httpRequestPath
 import com.galboss.protorype.databinding.FragmentPerfilBinding
+import com.galboss.protorype.fragments.viewModels.PerfilViewModel
 import com.galboss.protorype.model.Constant
 import com.galboss.protorype.model.entities.User
+import com.galboss.protorype.task.*
+import com.galboss.protorype.utils.UriUtils
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.squareup.picasso.Picasso
-import java.lang.IllegalArgumentException
-import java.util.logging.Level.INFO
+
 
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -42,7 +49,9 @@ class Perfil : Fragment() {
     private lateinit var viewModel: PerfilViewModel
     private var task:PerfilAsyncTask?=null
     private var user:User?=null
-
+    var gson = Gson()
+    //private lateinit var fileChooserResult:ActivityResultLauncher<String>
+    private lateinit var fileChooserResult:ActivityResultLauncher<Intent>
     enum class MethodRequest(val meth:Int){
         GET(1),
         POST(2),
@@ -51,7 +60,8 @@ class Perfil : Fragment() {
     }
     enum class UrlsApis(val url:String){
         GET_USER_DATA("http://192.168.0.143:3000/api/user/findById/"),
-        PATH_UPDATE_USER_DATA("http://192.168.0.143:3000/api/user/updateAll")
+        PATCH_UPDATE_USER_DATA("http://192.168.0.143:3000/api/user/updateAll"),
+        USER_IMAGE_UPDATE("http://192.168.0.143:3000/api/images/user")
     }
 
     // TODO: Rename and change types of parameters
@@ -64,12 +74,26 @@ class Perfil : Fragment() {
             param1 = it.getString(ARG_PARAM1)
             param2 = it.getString(ARG_PARAM2)
         }
+        /*fileChooserResult = registerForActivityResult(ActivityResultContracts.GetContent(),
+            ActivityResultCallback {
+                viewModel.setUserImage(it)
+                var path = getImageFilePath(this.requireContext(),it)
+                Log.i("Path" ,"${it.path.toString()}")
+                Log.i("Path", "${path}")
+            })*/
+            fileChooserResult = registerForActivityResult(ActivityResultContracts.StartActivityForResult()){ result:ActivityResult->
+            if(result.resultCode == Activity.RESULT_OK){
+                var dat= result.data?.data
+                viewModel.setUserImage(dat!!)
+            }
+        }
     }
+
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
         viewModel = ViewModelProvider(this).get(PerfilViewModel::class.java)
-        ejecutarTarea(viewModel,1,1,"","627b0c391512b7afcd1e43ef")
+        ejecutarTarea(viewModel,1,1,"","627b0c391512b7afcd1e43ef",null)
     }
 
     override fun onCreateView(
@@ -87,8 +111,15 @@ class Perfil : Fragment() {
         var passNewEdit = binding.perfilNewpassword.editText
         var passConfirmEdit = binding.perfilConfirmpassword.editText
         var imageView = binding.perfilImagen
+        imageView.isEnabled=false
         var bottnActu=binding.perfilActualizar
         var bottnMisArt = binding.perfilActualizar
+        var bottnCambFoto = binding.perfilCambiarFoto
+        bottnCambFoto.isEnabled=false
+        var bottnSubirFoto= binding.perfilEnviarFoto
+        bottnSubirFoto.isEnabled=false
+        var bottnCerrar=binding.perfilCerrarSesion
+        bottnCerrar.isEnabled=false
         userNameEdit?.setText("Pepe")
         // ViewModel initialization
 
@@ -98,10 +129,28 @@ class Perfil : Fragment() {
             userNameEdit?.setText(viewModel.user.value?.userName)
             emailEdit?.setText(viewModel.user.value?.email)
             passOldEdit?.setText(viewModel.user.value?.password)
-            var pica=Picasso.get().load("http://192.168.0.143:3000/api/images/user/file/627b0c391512b7afcd1e43ef").into(imageView)
-
+        })
+        viewModel.userImage.observe(this.viewLifecycleOwner, Observer {
+            Picasso.get().load(viewModel.userImage.value.toString()).into(imageView)
         })
         Log.i("Tenemos",user.toString())
+        bottnCambFoto.setOnClickListener{
+            fileChooser()
+        }
+        bottnSubirFoto.setOnClickListener{
+            ejecutarTarea(viewModel,MethodRequest.POST.meth, 1,viewModel.userImage.value!!.toString(),viewModel.user.value?._id,viewModel.userImage.value!!)
+        }
+        bottnActu.setOnClickListener{
+            if(passNewEdit?.text.toString().equals(passConfirmEdit?.text.toString())){
+                var user = viewModel.user.value
+                user?.password=passNewEdit?.editableText.toString()
+                user?.email=emailEdit?.editableText.toString()
+                user?.userName= userNameEdit?.editableText.toString()
+                viewModel.setUser(user!!)
+                var data = gson.toJson(viewModel.user.value).toString()
+                ejecutarTarea(viewModel,MethodRequest.PATCH.meth,1,data,null,null)
+            }
+        }
 
 
         //Return zone
@@ -128,33 +177,55 @@ class Perfil : Fragment() {
             }
     }
 
-    fun ejecutarTarea(viewModel:PerfilViewModel,method: Int,service:Int,params:String,userId: String?){
+    fun ejecutarTarea(viewModel:PerfilViewModel,method: Int,service:Int,params:String,userId: String?,uri:Uri?){
         if(task?.status== Constant.Status.RUNNING){
             task?.cancel(true)
         }
-        task = PerfilAsyncTask(params!!,method,service,this.requireContext(),userId,this.viewModel)
+        task = PerfilAsyncTask(params!!,method,service,this.requireContext(),userId,uri,viewModel)
         task?.execute()
     }
+    fun fileChooser(){
+        var intent = Intent(Intent.ACTION_OPEN_DOCUMENT,MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+        intent.addCategory(Intent.CATEGORY_OPENABLE)
+        intent.setType("image/*");
+        fileChooserResult.launch(intent)
+    }
 
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        when(resultCode){
+            10->if(requestCode==RESULT_OK){
+                var path = data?.getData()?.path.toString()
+                Log.i("FileChooser",path)
+            }
+        }
+    }
     inner class PerfilAsyncTask(
         private var parametros:String,
         private var method:Int,
         private var service: Int,
         private var context:Context,
         private var userId:String?,
+        private var uri:Uri?,
         private var viewModel:PerfilViewModel
         ): CoroutinesAsyncTask<Int, Int, String>("PerfilTask") {
 
         var gson = Gson()
 
-        override fun doInBackground(vararg params: Int?):String {
+        override fun doInBackground(vararg params: Int?): String {
             when(method){
                 1-> when(service){
                     1->return httpRequestGet("${UrlsApis.GET_USER_DATA.url}${userId!!}")
                     else->throw IllegalArgumentException("El servicio solicitado no existe")
                 }
+                2->{
+                    when(service){
+                        1->return multipartPostImageUser(UrlsApis.USER_IMAGE_UPDATE.url, userId!!, viewModel.userImage.value!!,context)
+                        else->throw IllegalArgumentException("El servicio solicitado no existe")
+                    }
+                }
                 3-> when(service){
-                    1->return return httpRequestPath("${UrlsApis.PATH_UPDATE_USER_DATA.url}", parametros)
+                    1->return httpRequestPatch("${UrlsApis.PATCH_UPDATE_USER_DATA.url}", parametros)
                     else -> throw IllegalArgumentException("El servicio solicitado no existe")
                 }
                 else -> throw IllegalArgumentException("El servicio solicitado no existe")

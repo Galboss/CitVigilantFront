@@ -137,6 +137,7 @@
             android:text="Cambiar Foto de Perfíl" />
         <Button
             android:id="@+id/perfil_enviarFoto"
+
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textAllCaps="false"

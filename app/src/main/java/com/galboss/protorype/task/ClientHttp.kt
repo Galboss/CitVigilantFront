@@ -1,19 +1,21 @@
 package com.galboss.protorype.task
 
+import android.content.Context
+import android.net.Uri
 import android.util.Log
-import org.apache.http.client.HttpClient
-import org.apache.http.client.methods.HttpPost
-import org.apache.http.entity.ContentType
-import org.apache.http.entity.mime.HttpMultipartMode
-import org.apache.http.entity.mime.MultipartEntityBuilder
-import org.apache.http.entity.mime.content.FileBody
-import org.apache.http.entity.mime.content.StringBody
-import org.apache.http.impl.client.HttpClientBuilder
+import androidx.core.net.toFile
+import com.galboss.protorype.utils.UriUtils
+import okhttp3.*
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.RequestBody.Companion.asRequestBody
+import okhttp3.RequestBody.Companion.toRequestBody
 import java.io.BufferedReader
 import java.io.File
+import java.io.IOException
 import java.io.InputStreamReader
 import java.net.HttpURLConnection
 import java.net.URL
+import java.util.concurrent.TimeUnit
 
 
 fun httpRequestGet(apiUrl:String):String{
@@ -92,7 +94,7 @@ fun httpRequestPost(apiUrl:String,params:String):String{
     return responseCont.toString()
 }
 
-fun httpRequestPath(apiUrl:String,params:String):String{
+fun httpRequestPatch(apiUrl:String,params:String):String{
     var connection:HttpURLConnection
     var reader: BufferedReader
     var line:String
@@ -133,7 +135,21 @@ fun httpRequestPath(apiUrl:String,params:String):String{
     return responseCont.toString()
 }
 
-fun multipartPostImageUser(url: String?, user: String?, path: String): String? {
+fun multipartPostImageUser(url: String?, user: String?, uri:Uri,context:Context): String {
+    var client = OkHttpClient();
+    var file= File(UriUtils.getPathFromUri(context,uri))
+    var formBody = MultipartBody.Builder().setType(MultipartBody.FORM)
+        .addFormDataPart("user","${user}")
+        .addFormDataPart("file",file.name, file.asRequestBody("image/jpg; charset=utf8".toMediaType()))
+        .build()
+    var request = Request.Builder().url(url!!).post(formBody).build()
+    client.newBuilder().callTimeout(60,TimeUnit.SECONDS)
+    var result=client.newCall(request).execute()
+    Log.i("resultado","${result.body?.string()}")
+    return result.toString()
+}
+/*
+fun multipartPostImageUser(url: String?, user: String?, path: String): String{
     val post = HttpPost(url)
     try {
         val client: HttpClient = HttpClientBuilder.create().build()
@@ -162,7 +178,7 @@ fun multipartPostImageUser(url: String?, user: String?, path: String): String? {
     return "Error"
 }
 
-fun multipartPostImageArticle(url: String?, article: String?, path: String): String? {
+fun multipartPostImageArticle(url: String?, article: String?, path: String): String {
     val post = HttpPost(url)
     try {
         val client: HttpClient = HttpClientBuilder.create().build()
@@ -189,4 +205,4 @@ fun multipartPostImageArticle(url: String?, article: String?, path: String): Str
     } catch (e: java.lang.Exception) {
     }
     return "Error"
-}
+}*/
