@@ -5,6 +5,7 @@ import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.galboss.protorype.MainActivity
 import com.galboss.protorype.model.entities.User
 
 class PerfilViewModel: ViewModel() {
@@ -16,7 +17,7 @@ class PerfilViewModel: ViewModel() {
     fun setUser(usuario:User){
         _user.value=usuario
         this.user=_user
-
+        MainActivity.viewModelAc.setUserActi(user.value!!)
     }
 
     fun setUserImage(nuevaImagen:Uri){

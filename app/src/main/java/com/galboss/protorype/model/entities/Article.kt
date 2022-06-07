@@ -11,5 +11,10 @@ data class Article(
     var canton:Int,
     var distrito:Int,
     var estado:Int,
-    var date:Date
-)
+    var date:Date?
+){
+    constructor():this("","","","",0,
+        0,0,0,null)
+
+
+}

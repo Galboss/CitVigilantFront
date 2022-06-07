@@ -81,7 +81,9 @@
     <androidx.recyclerview.widget.RecyclerView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/inicio_filter" />
+        android:id="@+id/inicio_recicler"
+        android:layout_below="@id/inicio_filter"
+        android:layout_marginBottom="60dp"/>
 
 
 </RelativeLayout>

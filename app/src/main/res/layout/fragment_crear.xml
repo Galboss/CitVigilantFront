@@ -28,12 +28,15 @@
             android:layout_height="wrap_content"
             android:layout_below="@id/crear_tituloFrag"
             android:hint="Título del artículo"
+            app:counterEnabled="true"
+            app:counterMaxLength="50"
             android:layout_marginHorizontal="10dp">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:singleLine="true"
+                android:maxLength="50"
                 android:inputType="text"/>
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -72,6 +75,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:singleLine="true"
+
                 android:inputType="text"/>
         </com.google.android.material.textfield.TextInputLayout>
 

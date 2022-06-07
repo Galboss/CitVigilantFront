@@ -16,17 +16,12 @@ interface MyApi {
     fun uploadUserImage(
         @Part file: MultipartBody.Part,
         @Part("user") user: RequestBody
-    ){
+    )
 
-    }
-
-    companion object{
-        operator fun invoke(): MyApi{
-            return Retrofit.Builder()
-                .baseUrl("http://192.168.0.143:3000/api/images/")
-                .addConverterFactory(GsonConverterFactory.create())
-                .build()
-                .create(MyApi::class.java)
-        }
-    }
+    @Multipart
+    @POST("article")
+    fun uploadArticle(
+        @Part file: MultipartBody.Part,
+        @Part("article") article: RequestBody
+    )
 }
