@@ -1,11 +1,9 @@
-package com.galboss.protorype.fragments
+package com.galboss.protorype.user.fragments
 
-import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.Activity.RESULT_OK
 import android.content.Context
 import android.content.Intent
-import android.database.Cursor
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
@@ -14,18 +12,18 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.result.ActivityResult
-import androidx.activity.result.ActivityResultCallback
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentTransaction
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import com.galboss.protorype.R
 import com.galboss.protorype.databinding.FragmentPerfilBinding
-import com.galboss.protorype.fragments.viewModels.PerfilViewModel
+import com.galboss.protorype.user.fragments.viewModels.PerfilViewModel
 import com.galboss.protorype.model.Constant
 import com.galboss.protorype.model.entities.User
 import com.galboss.protorype.task.*
-import com.galboss.protorype.utils.UriUtils
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.squareup.picasso.Picasso
@@ -59,9 +57,9 @@ class Perfil : Fragment() {
         DELETE(4)
     }
     enum class UrlsApis(val url:String){
-        GET_USER_DATA("http://192.168.0.143:3000/api/user/findById/"),
-        PATCH_UPDATE_USER_DATA("http://192.168.0.143:3000/api/user/updateAll"),
-        USER_IMAGE_UPDATE("http://192.168.0.143:3000/api/images/user")
+        GET_USER_DATA("https://citvigilant.herokuapp.com/api/user/findById/"),
+        PATCH_UPDATE_USER_DATA("https://citvigilant.herokuapp.com/api/user/updateAll"),
+        USER_IMAGE_UPDATE("https://citvigilant.herokuapp.com/api/images/user")
     }
 
     // TODO: Rename and change types of parameters
@@ -113,7 +111,7 @@ class Perfil : Fragment() {
         var imageView = binding.perfilImagen
         imageView.isEnabled=false
         var bottnActu=binding.perfilActualizar
-        var bottnMisArt = binding.perfilActualizar
+        var bottnMisArt = binding.perfilVermisarticulos
         var bottnCambFoto = binding.perfilCambiarFoto
         bottnCambFoto.isEnabled=false
         var bottnSubirFoto= binding.perfilEnviarFoto
@@ -150,6 +148,13 @@ class Perfil : Fragment() {
                 var data = gson.toJson(viewModel.user.value).toString()
                 ejecutarTarea(viewModel,MethodRequest.PATCH.meth,1,data,null,null)
             }
+        }
+        bottnMisArt.setOnClickListener{
+            var fragment = Inicio()
+            var transaction:FragmentTransaction = parentFragmentManager.beginTransaction();
+            transaction.replace(R.id.fragmentContainer,fragment)
+            transaction.addToBackStack("Mis Articulos")
+            transaction.commit()
         }
 
 

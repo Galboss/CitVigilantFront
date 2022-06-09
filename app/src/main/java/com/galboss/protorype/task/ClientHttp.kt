@@ -3,15 +3,12 @@ package com.galboss.protorype.task
 import android.content.Context
 import android.net.Uri
 import android.util.Log
-import androidx.core.net.toFile
 import com.galboss.protorype.utils.UriUtils
 import okhttp3.*
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.RequestBody.Companion.asRequestBody
-import okhttp3.RequestBody.Companion.toRequestBody
 import java.io.BufferedReader
 import java.io.File
-import java.io.IOException
 import java.io.InputStreamReader
 import java.net.HttpURLConnection
 import java.net.URL
@@ -103,6 +100,47 @@ fun httpRequestPatch(apiUrl:String,params:String):String{
     connection = url.openConnection() as HttpURLConnection
     try{
         connection.requestMethod="PATCH"
+        connection.connectTimeout=5000
+        connection.readTimeout=5000
+        connection.setRequestProperty("Content-Type","application/json; charset=utf-8")
+        connection.doOutput=true
+        connection.getOutputStream().use { os ->
+            val input: ByteArray = params.toByteArray(Charsets.UTF_8)
+            os.write(input, 0, input.size)
+        }
+        var status: Int = connection.responseCode
+        if(status>299){
+            reader = BufferedReader(InputStreamReader(connection.errorStream))
+            reader.forEachLine {
+                responseCont.append(it)
+            }
+            reader.close()
+        }else{
+            reader = BufferedReader(InputStreamReader(connection.inputStream))
+            reader.forEachLine {
+                responseCont.append(it)
+            }
+            reader.close()
+        }
+        Log.println(Log.INFO,"Info","Se obtuvo: ${responseCont.toString()}")
+    }catch (ex: Exception){
+        Log.println(Log.ERROR,"Error","Exception: ${ex.message}")
+        ex.printStackTrace()
+    }finally {
+        connection.disconnect()
+    }
+    return responseCont.toString()
+}
+
+fun httpRequestGetWithBody(apiUrl:String,params:String):String{
+    var connection:HttpURLConnection
+    var reader: BufferedReader
+    var line:String
+    var responseCont = StringBuffer()
+    var url = URL(apiUrl)
+    connection = url.openConnection() as HttpURLConnection
+    try{
+        connection.requestMethod="GET"
         connection.connectTimeout=5000
         connection.readTimeout=5000
         connection.setRequestProperty("Content-Type","application/json; charset=utf-8")

@@ -1,33 +1,33 @@
-package com.galboss.protorype.fragments
+package com.galboss.protorype.user.fragments
 
 import android.app.Activity
-import android.app.Instrumentation
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.text.InputType
 import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
+import android.widget.AdapterView.OnItemClickListener
 import android.view.ViewGroup
+import android.widget.ArrayAdapter
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.galboss.protorype.MainActivity
-import com.galboss.protorype.databinding.FragmentCrearBinding
 import com.galboss.protorype.R
-import com.galboss.protorype.fragments.viewModels.ArticleViewModel
+import com.galboss.protorype.databinding.FragmentCrearBinding
+import com.galboss.protorype.user.fragments.viewModels.ArticleViewModel
 import com.galboss.protorype.model.Constant
 import com.galboss.protorype.model.entities.Article
 import com.galboss.protorype.task.CoroutinesAsyncTask
+import com.galboss.protorype.task.httpRequestGet
 import com.galboss.protorype.task.httpRequestPost
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.gson.Gson
-import com.squareup.picasso.Picasso.get
-import org.apache.commons.logging.impl.Log4JLogger
+import com.google.gson.reflect.TypeToken
 import java.lang.IllegalArgumentException
 
 // TODO: Rename parameter arguments, choose names that match
@@ -49,6 +49,9 @@ class Crear : Fragment() {
     var gson = Gson()
     private lateinit var fileChooserResult: ActivityResultLauncher<Intent>
     private  lateinit var viewModel:ArticleViewModel
+    private var provinciaHolder=0
+    private var cantonHolder=0
+    private var distritoHolder=0
 
     enum class MethodRequest(var METH:Int){
         GET(1),
@@ -57,7 +60,10 @@ class Crear : Fragment() {
         DELETE(4)
     }
     enum class UrlsApis(val URL:String){
-        POST_ARTICLE("http://192.168.0.143:3000/api/article")
+        POST_ARTICLE("https://citvigilant.herokuapp.com/api/article"),
+        GET_LOCATION_PROVINCIA("https://citvigilant.herokuapp.com/api/location"),
+        GET_LOCATION_CANTDIS("https://citvigilant.herokuapp.com/api/location/"),
+        GET_ARTILCES_BYLOCATION("https://citvigilant.herokuapp.com/api/article/findByLocation")
     }
 
 
@@ -84,6 +90,7 @@ class Crear : Fragment() {
         super.onAttach(context)
         viewModel=ViewModelProvider(this).get(ArticleViewModel::class.java)
         viewModel.setArticle(Article())
+        ejecutarTarea(viewModel,MethodRequest.GET.METH,1,"",null,null)
     }
 
     override fun onCreateView(
@@ -97,22 +104,27 @@ class Crear : Fragment() {
         //Binding zone
         var titulo = binding.crearTituloArticulo?.editText
         var contenido = binding.crearContenido?.editText
-        var provincia = binding.crearProvincia?.editText
-        provincia?.inputType=InputType.TYPE_CLASS_NUMBER
-        var canton = binding.crearCanton?.editText
-        canton?.inputType=InputType.TYPE_CLASS_NUMBER
-        var distrito = binding.crearDistrito?.editText
-        distrito?.inputType=InputType.TYPE_CLASS_NUMBER
+        var spinnerProvincia = binding.crearAutoProvincia
+        var spinnerCanton = binding.crearAutoCanton
+        spinnerCanton.isEnabled=false
+        var spinnerDistrito = binding.crearAutoDistrito
+        spinnerDistrito.isEnabled=false
         var bottnImages = binding.buttonChooseImages
         bottnImages.isEnabled=false
         var bottnPublis = binding.buttonPublicar
+        bottnPublis.isEnabled=false
+        // Defining spinners adapters
+        var provAdapter = ArrayAdapter<String>(this.requireContext(),
+            R.layout.spinner_item, R.id.text_item_display, arrayOf())
+        spinnerProvincia.setAdapter(provAdapter)
+        var cantAdapter = ArrayAdapter<String>(this.requireContext(),
+            R.layout.spinner_item, R.id.text_item_display, arrayOf())
+        var distAdapter = ArrayAdapter<String>(this.requireContext(),
+            R.layout.spinner_item, R.id.text_item_display, arrayOf())
         //programming zone
         viewModel.article.observe(this.viewLifecycleOwner, Observer {
             titulo?.setText(viewModel.article.value?.title)
             contenido?.setText(viewModel.article.value?.content)
-            provincia?.setText(viewModel.article.value?.provincia.toString())
-            canton?.setText(viewModel.article.value?.canton.toString())
-            distrito?.setText(viewModel.article.value?.distrito.toString())
         })
         titulo?.setOnFocusChangeListener{_,hasFocus->
             if(!hasFocus){
@@ -124,22 +136,48 @@ class Crear : Fragment() {
                 viewModel.article.value?.content=contenido.text.toString()
             }
         }
-        provincia?. setOnFocusChangeListener{_,hasFocus->
-            if(!hasFocus){
-                if(!provincia.text.toString().isEmpty())
-                    viewModel.article.value?.provincia=provincia.text.toString().toInt()
+        spinnerProvincia.onItemClickListener=
+            OnItemClickListener{ parent,arg1,pos,id->
+                this.provinciaHolder = pos+1
+                viewModel.article.value!!.provincia=provinciaHolder
+                ejecutarTarea(viewModel,MethodRequest.GET.METH,2,"",provinciaHolder,null)
+                spinnerCanton.isEnabled=true
+                bottnPublis.isEnabled=false
+                spinnerCanton.setText("")
+                spinnerDistrito.setText("")
             }
-        }
-        canton?.setOnFocusChangeListener{_,hasFocus->
-            if(!hasFocus)
-                if(!canton?.text.toString().isEmpty())
-                    viewModel.article.value?.canton=canton?.text.toString().toInt()
-        }
-        distrito?.setOnFocusChangeListener{_, hasFocus->
-            if(!hasFocus)
-                if(!distrito?.text.toString().isEmpty())
-                    viewModel.article.value?.distrito=distrito?.text.toString().toInt()
-        }
+        viewModel.provincias.observe(this.viewLifecycleOwner, Observer {
+            var prov : Array<String> = viewModel.provincias.value!!.toTypedArray()
+            provAdapter = ArrayAdapter<String>(this.requireContext(),R.layout.spinner_item,R.id.text_item_display, prov)
+            spinnerProvincia.setAdapter(provAdapter)
+        })
+        spinnerCanton.onItemClickListener=
+            OnItemClickListener{parent,arg1,pos,id->
+                this.cantonHolder = pos+1
+                viewModel.article.value!!.canton=cantonHolder
+                ejecutarTarea(viewModel,MethodRequest.GET.METH,3,"",provinciaHolder,cantonHolder)
+                spinnerDistrito.isEnabled=true
+                bottnPublis.isEnabled=false
+                spinnerDistrito.setText("")
+            }
+        viewModel.cantones.observe(this.viewLifecycleOwner, Observer {
+            var cant : Array<String> = viewModel.cantones.value!!.toTypedArray()
+            cantAdapter = ArrayAdapter<String>(this.requireContext(),R.layout.spinner_item,R.id.text_item_display, cant)
+            spinnerCanton.setAdapter(cantAdapter)
+        })
+        viewModel.distritos.observe(this.viewLifecycleOwner, Observer {
+            var dist : Array<String> = viewModel.distritos.value!!.toTypedArray()
+            distAdapter = ArrayAdapter<String>(this.requireContext(),R.layout.spinner_item,R.id.text_item_display, dist)
+            spinnerDistrito.setAdapter(distAdapter)
+        })
+        spinnerDistrito.onItemClickListener=
+            OnItemClickListener{parent,arg1,pos,id->
+                this.distritoHolder=pos+1
+                viewModel.article.value!!.distrito=distritoHolder
+                bottnPublis.isEnabled=true
+            }
+
+
         Log.i("Activity ViewModel","${MainActivity.viewModelAc.userActivity.value.toString()}")
         bottnPublis.setOnClickListener{
             var data = viewModel.article.value
@@ -153,7 +191,11 @@ class Crear : Fragment() {
             }else{
                 data.user=MainActivity.viewModelAc.userActivity.value!!._id!!
                 var json = gson.toJson(data)
-                ejecutarTarea(viewModel,MethodRequest.POST.METH,1,json.toString())
+                ejecutarTarea(viewModel,MethodRequest.POST.METH,1,json.toString(),null,null)
+                MaterialAlertDialogBuilder(this.requireContext()).setTitle("Artículo Publicado")
+                    .setMessage("El articulo ha sido publicado con exito.")
+                    .setPositiveButton("Ok"){dialog, which->}
+                    .show()
             }
         }
         //Return vista
@@ -180,10 +222,10 @@ class Crear : Fragment() {
             }
     }
 
-    fun ejecutarTarea(viewModel: ArticleViewModel,method: Int,service: Int,params:String){
+    fun ejecutarTarea(viewModel: ArticleViewModel,method: Int,service: Int,params:String,provincia: Int?,canton: Int?){
         if(task?.status == Constant.Status.RUNNING)
             task?.cancel(true)
-        task = CrearAsyncTask(params!!,method,service,this.requireContext(),viewModel)
+        task = CrearAsyncTask(params!!,method,service,this.requireContext(),viewModel,provincia,canton)
         task?.execute()
     }
 
@@ -192,15 +234,49 @@ class Crear : Fragment() {
         private var method:Int,
         private var service:Int,
         private var context: Context?,
-        private var viewModel:ArticleViewModel
+        private var viewModel:ArticleViewModel,
+        private var provincia:Int?,
+        private var canton:Int?
     ):CoroutinesAsyncTask<Int,Int,String>("Servicios de articulos"){
         override fun doInBackground(vararg params: Int?):String {
+            var gson=Gson()
             when(method){
+                1->when(service){
+                    1->return httpRequestGet("${Inicio.UrlApis.GET_LOCATION_PROVINCIA.URL}")
+                    2->return httpRequestGet("${Inicio.UrlApis.GET_LOCATION_CANTDIS.URL}${provincia}/cantones")
+                    3->return httpRequestGet("${Inicio.UrlApis.GET_LOCATION_CANTDIS.URL}${provincia}/${canton}/distritos")
+                    else-> throw IllegalArgumentException("El servicio solicitado no existe")
+                }
                 2->when(service){
                     1->return httpRequestPost(UrlsApis.POST_ARTICLE.URL,parametros)
                     else-> throw IllegalArgumentException("El servicio solicitado no existe")
                 }
                 else-> throw IllegalArgumentException("El método solicitado no existe")
+            }
+        }
+
+        override fun onPostExecute(result: String?) {
+            super.onPostExecute(result)
+            when(method){
+                1->when(service){
+                    1->{
+                        Log.i("Se Obtuvo","${result}")
+                        var sType = object : TypeToken<List<String>>(){}.type
+                        var data = gson.fromJson<List<String>>(result,sType)
+                        viewModel.setProvincias(data)
+                    }
+                    2->{
+                        var sType = object : TypeToken<List<String>>(){}.type
+                        var data = gson.fromJson<List<String>>(result,sType)
+                        Log.i("cantones","${result}")
+                        viewModel.setCantones(data)
+                    }
+                    3->{
+                        var sType = object : TypeToken<List<String>>(){}.type
+                        var data = gson.fromJson<List<String>>(result,sType)
+                        viewModel.setDistritos(data)
+                    }
+                }
             }
         }
     }

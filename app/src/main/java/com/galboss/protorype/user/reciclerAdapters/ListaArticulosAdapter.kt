@@ -1,9 +1,7 @@
-package com.galboss.protorype.reciclerAdapters
+package com.galboss.protorype.user.reciclerAdapters
 
 import android.content.Context
-import android.graphics.Color
 import android.graphics.Typeface
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -28,9 +26,9 @@ class ListaArticulosAdapter(
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         holder.bindData(nData.get(position))
         var item = nData.get(position)
-        holder.itemView.setOnClickListener{
+        /*holder.itemView.setOnClickListener{
             holder.itemView.setBackgroundColor(Color.GREEN)
-        }
+        }*/
     }
 
     override fun getItemCount(): Int {
