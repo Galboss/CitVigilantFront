@@ -22,7 +22,7 @@ class SplashActivity : AppCompatActivity() {
         //scalateImage(image,this)
         supportActionBar?.hide()
         Handler(Looper.getMainLooper()).postDelayed({
-            val intent = Intent (this,MainActivity::class.java)
+            val intent = Intent (this,Loggin_Register_Activity::class.java)
             startActivity(intent)
             finish()
         },1500)

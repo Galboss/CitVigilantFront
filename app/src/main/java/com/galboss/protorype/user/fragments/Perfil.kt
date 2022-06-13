@@ -18,6 +18,8 @@ import androidx.fragment.app.FragmentTransaction
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import com.galboss.protorype.Loggin_Register_Activity
+import com.galboss.protorype.MainActivity
 import com.galboss.protorype.R
 import com.galboss.protorype.databinding.FragmentPerfilBinding
 import com.galboss.protorype.user.fragments.viewModels.PerfilViewModel
@@ -96,7 +98,7 @@ class Perfil : Fragment() {
     override fun onAttach(context: Context) {
         super.onAttach(context)
         viewModel = ViewModelProvider(this).get(PerfilViewModel::class.java)
-        ejecutarTarea(viewModel,1,1,"","627b0c391512b7afcd1e43ef",null)
+        ejecutarTarea(viewModel,1,1,"",MainActivity.viewModelAc.userActivity.value!!._id,null)
     }
 
     override fun onCreateView(
@@ -119,7 +121,6 @@ class Perfil : Fragment() {
         var bottnCambFoto = binding.perfilCambiarFoto
         var bottnSubirFoto= binding.perfilEnviarFoto
         var bottnCerrar=binding.perfilCerrarSesion
-        bottnCerrar.isEnabled=false
         userNameEdit?.setText("Pepe")
         // ViewModel initialization
 
@@ -167,6 +168,11 @@ class Perfil : Fragment() {
             transaction.replace(R.id.fragmentContainer,fragment)
             transaction.addToBackStack("Mis Articulos")
             transaction.commit()
+        }
+        bottnCerrar.setOnClickListener {
+            val intent = Intent (this.activity,Loggin_Register_Activity::class.java)
+            startActivity(intent)
+            activity?.finish()
         }
         //Return zone
         return root

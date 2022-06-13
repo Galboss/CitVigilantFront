@@ -17,6 +17,11 @@
         android:theme="@style/Theme.Protorype"
         android:usesCleartextTraffic="true">
         <activity
+            android:name=".Loggin_Register_Activity"
+            android:exported="true"
+            android:label="@string/title_activity_loggin_register"
+            android:theme="@style/Theme.Protorype.NoActionBar" />
+        <activity
             android:name=".SplashActivity"
             android:exported="true">
             <intent-filter>
@@ -28,11 +33,14 @@
         <activity
             android:name=".MainActivity"
             android:exported="true">
-            <!--<intent-filter>
+
+            <!--
+            <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>-->
+            </intent-filter>
+            -->
         </activity>
 
         <meta-data

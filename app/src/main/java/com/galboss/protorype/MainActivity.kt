@@ -33,12 +33,12 @@ class MainActivity : AppCompatActivity() {
             }
             true
         }
-
         viewModelAc = ViewModelProvider(this).get(MainActivityViewModel::class.java)
         viewModelAc.userActivity.observe(this, Observer {
 
         })
-        ejecutarTarea(viewModelAc,1,1)
+        var extras= this.intent
+        ejecutarTarea(viewModelAc,1,1,extras.getStringExtra("userId"))
 
     }
 
@@ -49,11 +49,11 @@ class MainActivity : AppCompatActivity() {
         fragTransaction.commit()
     }
 
-    fun ejecutarTarea(viewModel: MainActivityViewModel, method: Int, service:Int){
+    fun ejecutarTarea(viewModel: MainActivityViewModel, method: Int, service:Int,user: String?){
         if(task?.status== Constant.Status.RUNNING){
             task?.cancel(true)
         }
-        task = MainActivityAsyncTask(method,service, viewModelAc,"627b0c391512b7afcd1e43ef")
+        task = MainActivityAsyncTask(method,service, viewModelAc,user)
         task?.execute()
     }
 

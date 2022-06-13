@@ -1,9 +1,6 @@
 package com.galboss.protorype.api
 
-import com.galboss.protorype.model.entities.Article
-import com.galboss.protorype.model.entities.Commentary
-import com.galboss.protorype.model.entities.CommentaryWithUser
-import com.galboss.protorype.model.entities.MessageResponse
+import com.galboss.protorype.model.entities.*
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import retrofit2.Response
@@ -32,6 +29,15 @@ interface MyApi {
     ):Response<MessageResponse>
 
     //user
+    @POST("user/login")
+    suspend fun loging(
+        @Body user:UserLoggin
+    ):Response<UserLoggin>
+
+    @POST ("user/")
+    suspend fun createUser(
+        @Body user: UserLoggin
+    ):Response<UserLoggin>
 
     //images
     @Multipart

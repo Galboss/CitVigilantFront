@@ -5,6 +5,7 @@
       <map>
         <entry key="..\:/Users/bryan/Desktop/Front/prototype/app/src/main/res/drawable/commentary_item.xml" value="0.3635" />
         <entry key="..\:/Users/bryan/Desktop/Front/prototype/app/src/main/res/drawable/image_rounded.xml" value="0.2935" />
+        <entry key="..\:/Users/bryan/Desktop/Front/prototype/app/src/main/res/layout/activity_loggin_register.xml" value="0.18541666666666667" />
         <entry key="..\:/Users/bryan/Desktop/Front/prototype/app/src/main/res/layout/activity_main.xml" value="0.3134057971014493" />
         <entry key="..\:/Users/bryan/Desktop/Front/prototype/app/src/main/res/layout/activity_splash.xml" value="0.18541666666666667" />
         <entry key="..\:/Users/bryan/Desktop/Front/prototype/app/src/main/res/layout/commentary_item.xml" value="0.3625" />
@@ -13,7 +14,9 @@
         <entry key="..\:/Users/bryan/Desktop/Front/prototype/app/src/main/res/layout/fragment_buscar.xml" value="0.3625" />
         <entry key="..\:/Users/bryan/Desktop/Front/prototype/app/src/main/res/layout/fragment_crear.xml" value="0.3625" />
         <entry key="..\:/Users/bryan/Desktop/Front/prototype/app/src/main/res/layout/fragment_inicio.xml" value="0.3625" />
+        <entry key="..\:/Users/bryan/Desktop/Front/prototype/app/src/main/res/layout/fragment_loggin.xml" value="0.1" />
         <entry key="..\:/Users/bryan/Desktop/Front/prototype/app/src/main/res/layout/fragment_perfil.xml" value="0.3625" />
+        <entry key="..\:/Users/bryan/Desktop/Front/prototype/app/src/main/res/layout/fragment_register.xml" value="0.22" />
         <entry key="..\:/Users/bryan/Desktop/Front/prototype/app/src/main/res/layout/list_article_item.xml" value="0.33" />
         <entry key="..\:/Users/bryan/Desktop/Front/prototype/app/src/main/res/layout/spinner_item.xml" value="0.18541666666666667" />
         <entry key="..\:/Users/bryan/Desktop/Front/prototype/app/src/main/res/menu/boton_navmenu.xml" value="0.5" />
