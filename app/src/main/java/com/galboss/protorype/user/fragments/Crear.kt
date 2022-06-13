@@ -3,7 +3,9 @@ package com.galboss.protorype.user.fragments
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
+import android.provider.MediaStore
 import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -12,23 +14,34 @@ import android.widget.AdapterView.OnItemClickListener
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import androidx.activity.result.ActivityResult
+import androidx.activity.result.ActivityResultCallback
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import com.galboss.protorype.MainActivity
 import com.galboss.protorype.R
 import com.galboss.protorype.databinding.FragmentCrearBinding
 import com.galboss.protorype.user.fragments.viewModels.ArticleViewModel
 import com.galboss.protorype.model.Constant
 import com.galboss.protorype.model.entities.Article
+import com.galboss.protorype.model.entities.MessageResponse
 import com.galboss.protorype.task.CoroutinesAsyncTask
 import com.galboss.protorype.task.httpRequestGet
 import com.galboss.protorype.task.httpRequestPost
+import com.galboss.protorype.user.responses.ArticleResponses
+import com.galboss.protorype.utils.UriUtils
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import kotlinx.coroutines.CoroutineName
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import java.io.File
 import java.lang.IllegalArgumentException
+import java.lang.StringBuilder
 
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -78,9 +91,22 @@ class Crear : Fragment() {
             param2 = it.getString(ARG_PARAM2)
         }
 
-        fileChooserResult = registerForActivityResult(ActivityResultContracts.StartActivityForResult()){ result: ActivityResult ->
+        fileChooserResult = registerForActivityResult(ActivityResultContracts.StartActivityForResult() ){ result->
             if(result.resultCode==Activity.RESULT_OK){
-                var dat = result.data?.data
+                var images: ArrayList<String> = arrayListOf()
+                var dat = result.data
+                if(dat?.clipData!=null){
+                    val count = dat.clipData?.itemCount?:0
+                    //multiples imagenes
+                    for(i in 0 until count){
+                        images.add(UriUtils.getPathFromUri(this.requireContext(),dat.clipData?.getItemAt(i)?.uri))
+                    }
+                }else if(dat?.data!=null){
+                    //Cuando solo viene una unica imagen
+                    images.add(UriUtils.getPathFromUri(this.requireContext(),dat.data))
+                }
+                Log.i("Galeria de imagenes","${images.toString()}")
+                viewModel.setImages(images)
             }
         }
 
@@ -98,6 +124,7 @@ class Crear : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
+        var extra = this.arguments
         _binding = FragmentCrearBinding.inflate(inflater,container,false)
          binding= _binding!!
         val root:View = binding?.root!!
@@ -112,7 +139,11 @@ class Crear : Fragment() {
         var bottnImages = binding.buttonChooseImages
         bottnImages.isEnabled=false
         var bottnPublis = binding.buttonPublicar
+        var titleFragment = binding.crearTituloFrag
         bottnPublis.isEnabled=false
+        var textImages = binding.textviewPaths
+        var bottSubirIma= binding.buttonUploadImages
+        bottSubirIma.isEnabled=false
         // Defining spinners adapters
         var provAdapter = ArrayAdapter<String>(this.requireContext(),
             R.layout.spinner_item, R.id.text_item_display, arrayOf())
@@ -125,6 +156,9 @@ class Crear : Fragment() {
         viewModel.article.observe(this.viewLifecycleOwner, Observer {
             titulo?.setText(viewModel.article.value?.title)
             contenido?.setText(viewModel.article.value?.content)
+            if(!viewModel.article.value!!._id.isNullOrEmpty()){
+                bottnImages.isEnabled=true
+            }
         })
         titulo?.setOnFocusChangeListener{_,hasFocus->
             if(!hasFocus){
@@ -176,30 +210,104 @@ class Crear : Fragment() {
                 viewModel.article.value!!.distrito=distritoHolder
                 bottnPublis.isEnabled=true
             }
-
-
-        Log.i("Activity ViewModel","${MainActivity.viewModelAc.userActivity.value.toString()}")
-        bottnPublis.setOnClickListener{
-            var data = viewModel.article.value
-            Log.i("ArticleViewModel","${viewModel.article.value.toString()}")
-            if(data!!.title.isEmpty()||data!!.content.isEmpty()
-                ||data!!.provincia==0||data!!.canton==0||data!!.distrito==0){
-                MaterialAlertDialogBuilder(this.requireContext()).setTitle("Error")
-                    .setMessage("Falta llenar algunos campos en el formulario anterior...")
-                    .setPositiveButton("Ok"){dialog, which->}
-                    .show()
-            }else{
-                data.user=MainActivity.viewModelAc.userActivity.value!!._id!!
-                var json = gson.toJson(data)
-                ejecutarTarea(viewModel,MethodRequest.POST.METH,1,json.toString(),null,null)
-                MaterialAlertDialogBuilder(this.requireContext()).setTitle("Artículo Publicado")
+        if(arguments!=null){
+            var id = arguments?.getString("articleId")!!
+            getArticleById(id,viewModel)
+            titleFragment.setText("Modificar el articulo")
+            bottnPublis.isEnabled=true
+            bottnPublis.setText("Actualizar Artículo")
+            bottnPublis.setOnClickListener {
+                viewModel.article.value!!.user=MainActivity.viewModelAc.userActivity.value!!._id!!
+                viewModel.article.value!!.content=contenido?.text.toString()
+                viewModel.article.value!!.title=titulo?.text.toString()
+                var json = gson.toJson(viewModel.article.value!!)
+                patchArticle(viewModel.article.value!!)
+                MaterialAlertDialogBuilder(this.requireContext()).setTitle("Artículo Actualizado")
                     .setMessage("El articulo ha sido publicado con exito.")
                     .setPositiveButton("Ok"){dialog, which->}
                     .show()
             }
+        }else{
+            bottnPublis.setOnClickListener{
+                var data = viewModel.article.value
+                Log.i("ArticleViewModel","${viewModel.article.value.toString()}")
+                if(data!!.title.isEmpty()||data!!.content.isEmpty()
+                    ||data!!.provincia==0||data!!.canton==0||data!!.distrito==0){
+                    MaterialAlertDialogBuilder(this.requireContext()).setTitle("Error")
+                        .setMessage("Falta llenar algunos campos en el formulario anterior...")
+                        .setPositiveButton("Ok"){dialog, which->}
+                        .show()
+                }else{
+                    data.user=MainActivity.viewModelAc.userActivity.value!!._id!!
+                    var json = gson.toJson(data)
+                    ejecutarTarea(viewModel,MethodRequest.POST.METH,1,json.toString(),null,null)
+                    MaterialAlertDialogBuilder(this.requireContext()).setTitle("Artículo Publicado")
+                        .setMessage("El articulo ha sido publicado con exito.")
+                        .setPositiveButton("Ok"){dialog, which->}
+                        .show()
+                }
+            }
         }
+        bottnImages.setOnClickListener(){
+            getImagesFromPhone()
+        }
+        bottSubirIma.setOnClickListener(){
+            uploadImagesToServer()
+        }
+        viewModel.images.observe(this.viewLifecycleOwner, Observer {
+            val count = viewModel.images.value?.count()
+            val allPath =StringBuilder()
+            for(i in 0 until count!!){
+                allPath.append("${viewModel.images.value!!.get(i)}\n")
+            }
+            textImages.setText(allPath.toString())
+            if(!viewModel.images.value!!.isEmpty())
+                bottSubirIma.isEnabled=true
+        })
+
+
         //Return vista
         return root
+    }
+
+    private fun getArticleById(id:String,viewModel: ArticleViewModel){
+        lifecycleScope.launch {
+            var responses = ArticleResponses()
+            var data = responses.getArticleById(id)
+            viewModel.setArticle(data.body()!!)
+        }
+    }
+
+    private fun patchArticle(article:Article){
+        lifecycleScope.launch {
+            var responses = ArticleResponses()
+            var data = responses.pathArticle(article)
+            Log.i("Patch Protocol","${data.body()}")
+        }
+    }
+
+    fun getImagesFromPhone(){
+        var intent = Intent(Intent.ACTION_OPEN_DOCUMENT,MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+        intent.addCategory(Intent.CATEGORY_OPENABLE)
+        intent.setType("image/*")
+        intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
+        fileChooserResult.launch(intent)
+    }
+
+    fun uploadImagesToServer(){
+        var count = viewModel.images.value!!.count()
+        for (i in 0 until count){
+            lifecycleScope.launch {
+                var responses= ArticleResponses()
+                var file = File(viewModel.images.value!!.get(i))
+                var id = viewModel.article.value!!._id
+                var data = responses.uploadImage(file,id!!)
+            }
+        }
+        MaterialAlertDialogBuilder(this.requireContext()).setTitle("Imagenes subidas")
+            .setMessage("Las imagenes has sido subidas con éxito")
+            .setPositiveButton("Ok"){dialog, which->}
+            .show()
     }
 
     companion object {
@@ -275,6 +383,13 @@ class Crear : Fragment() {
                         var sType = object : TypeToken<List<String>>(){}.type
                         var data = gson.fromJson<List<String>>(result,sType)
                         viewModel.setDistritos(data)
+                    }
+                }
+                2->when(service){
+                    1->{
+                        var sType = object : TypeToken<Article>(){}.type
+                        var data = gson.fromJson<Article>(result,sType)
+                        viewModel.setArticle(data)
                     }
                 }
             }

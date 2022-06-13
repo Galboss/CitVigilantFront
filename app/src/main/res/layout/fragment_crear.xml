@@ -5,7 +5,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    tools:context=".user.fragments.Crear">
+    tools:context=".user.fragments.Crear"
+    android:layout_marginBottom="60dp">
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -114,23 +115,8 @@
                 android:focusable="true"
                 android:focusableInTouchMode="false"
                 android:layout_height="match_parent"/>
+
         </com.google.android.material.textfield.TextInputLayout>
-
-        <Button
-            android:id="@+id/button_chooseImages"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/crear_distrito"
-            android:layout_marginHorizontal="10dp"
-            android:text="Adjuntar Imagenes"
-            android:textAllCaps="false" />
-
-        <TextView
-            android:id="@+id/textview_paths"
-            android:layout_width="match_parent"
-            android:layout_below="@id/button_chooseImages"
-            android:layout_height="wrap_content"
-            android:text="" />
 
         <Button
             android:id="@+id/button_publicar"
@@ -138,8 +124,32 @@
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="10dp"
             android:textAllCaps="false"
-            android:layout_below="@id/textview_paths"
+            android:layout_below="@id/crear_distrito"
             android:text="Publicar Artículo" />
+
+        <TextView
+            android:id="@+id/textview_paths"
+            android:layout_width="match_parent"
+            android:layout_below="@id/button_publicar"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="10dp"
+            android:text="" />
+        <Button
+            android:id="@+id/button_chooseImages"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/textview_paths"
+            android:layout_marginHorizontal="10dp"
+            android:text="Adjuntar Imagenes"
+            android:textAllCaps="false" />
+        <Button
+            android:id="@+id/button_uploadImages"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/button_chooseImages"
+            android:layout_marginHorizontal="10dp"
+            android:text="Subir imagenes"
+            android:textAllCaps="false" />
 
     </RelativeLayout>
 

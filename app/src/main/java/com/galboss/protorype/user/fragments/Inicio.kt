@@ -1,6 +1,8 @@
 package com.galboss.protorype.user.fragments
 
 import android.content.Context
+import android.content.Intent
+import android.graphics.Canvas
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -11,6 +13,7 @@ import android.widget.ArrayAdapter
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.galboss.protorype.R
@@ -22,8 +25,10 @@ import com.galboss.protorype.user.reciclerAdapters.ListaArticulosAdapter
 import com.galboss.protorype.task.CoroutinesAsyncTask
 import com.galboss.protorype.task.httpRequestGet
 import com.galboss.protorype.task.httpRequestGetWithBody
+import com.galboss.protorype.utils.SwipeHelperCallback
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import it.xabaras.android.recyclerview.swipedecorator.RecyclerViewSwipeDecorator
 
 
 // TODO: Rename parameter arguments, choose names that match
@@ -85,6 +90,7 @@ class Inicio : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+        var extras = this.arguments
         _binding = FragmentInicioBinding.inflate(inflater,container,false)
         recycler = binding.inicioRecicler
         recycler.layoutManager = LinearLayoutManager(recycler.context)
@@ -105,7 +111,32 @@ class Inicio : Fragment() {
             R.layout.spinner_item,R.id.text_item_display, arrayOf())
         //recycler.setHasFixedSize(true)
         //Programming zone
-        adapter= ListaArticulosAdapter(listOf(),inflater,binding.root.context)
+        adapter= ListaArticulosAdapter(listOf(),inflater,binding.root.context,this.parentFragmentManager)
+        //Swipe gesture
+        if(extras!=null){
+            val gesture = object :SwipeHelperCallback(requireContext()){
+                override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+                    when(direction){
+                        ItemTouchHelper.RIGHT->{
+                            adapter.deleteItem(viewHolder.bindingAdapterPosition)
+                        }
+                        ItemTouchHelper.LEFT->{
+                            var itemEdit = viewModel.list.value!!.get(viewHolder.bindingAdapterPosition)
+                            var fragmentCrear = Crear();
+                            var arguments = Bundle()
+                            arguments.putString("articleId",itemEdit._id)
+                            fragmentCrear.arguments=arguments
+                            var ft = parentFragmentManager.beginTransaction()
+                            ft.replace(R.id.fragmentContainer,fragmentCrear,"Modificar articulo")
+                            ft.addToBackStack("Edit Article")
+                            ft.commit()
+                        }
+                    }
+                }
+            }
+            val touchHelper = ItemTouchHelper(gesture)
+            touchHelper.attachToRecyclerView(recycler)
+        }
         recycler.adapter=adapter
         //Spinners onChangeItems
         spinnerProv.onItemClickListener =

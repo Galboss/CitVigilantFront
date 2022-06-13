@@ -1,7 +1,6 @@
 package com.galboss.protorype.user.fragments
 
 import android.app.Activity
-import android.app.Activity.RESULT_OK
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
@@ -18,15 +17,21 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentTransaction
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import com.galboss.protorype.R
 import com.galboss.protorype.databinding.FragmentPerfilBinding
 import com.galboss.protorype.user.fragments.viewModels.PerfilViewModel
 import com.galboss.protorype.model.Constant
 import com.galboss.protorype.model.entities.User
 import com.galboss.protorype.task.*
+import com.galboss.protorype.user.responses.UserImagesResponses
+import com.galboss.protorype.utils.UriUtils.getPathFromUri
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.squareup.picasso.Picasso
+import kotlinx.coroutines.launch
+import java.io.File
 
 
 // TODO: Rename parameter arguments, choose names that match
@@ -72,13 +77,13 @@ class Perfil : Fragment() {
             param1 = it.getString(ARG_PARAM1)
             param2 = it.getString(ARG_PARAM2)
         }
-        /*fileChooserResult = registerForActivityResult(ActivityResultContracts.GetContent(),
+        /*fileChooserResult = registerForActivityResult(ActivityResultContracts.GetContent())
             ActivityResultCallback {
                 viewModel.setUserImage(it)
-                var path = getImageFilePath(this.requireContext(),it)
+                var path =UriUtils.getImageFilePath(this.requireContext(),it)
                 Log.i("Path" ,"${it.path.toString()}")
                 Log.i("Path", "${path}")
-            })*/
+            }*/
             fileChooserResult = registerForActivityResult(ActivityResultContracts.StartActivityForResult()){ result:ActivityResult->
             if(result.resultCode == Activity.RESULT_OK){
                 var dat= result.data?.data
@@ -109,13 +114,10 @@ class Perfil : Fragment() {
         var passNewEdit = binding.perfilNewpassword.editText
         var passConfirmEdit = binding.perfilConfirmpassword.editText
         var imageView = binding.perfilImagen
-        imageView.isEnabled=false
         var bottnActu=binding.perfilActualizar
         var bottnMisArt = binding.perfilVermisarticulos
         var bottnCambFoto = binding.perfilCambiarFoto
-        bottnCambFoto.isEnabled=false
         var bottnSubirFoto= binding.perfilEnviarFoto
-        bottnSubirFoto.isEnabled=false
         var bottnCerrar=binding.perfilCerrarSesion
         bottnCerrar.isEnabled=false
         userNameEdit?.setText("Pepe")
@@ -127,16 +129,23 @@ class Perfil : Fragment() {
             userNameEdit?.setText(viewModel.user.value?.userName)
             emailEdit?.setText(viewModel.user.value?.email)
             passOldEdit?.setText(viewModel.user.value?.password)
+            Picasso.get().load("http:192.168.0.143:3000/api/images/user/file/${user?._id}").into(imageView)
         })
         viewModel.userImage.observe(this.viewLifecycleOwner, Observer {
             Picasso.get().load(viewModel.userImage.value.toString()).into(imageView)
         })
         Log.i("Tenemos",user.toString())
         bottnCambFoto.setOnClickListener{
+            eliminarFoto(viewModel.user.value!!._id!!)
             fileChooser()
         }
         bottnSubirFoto.setOnClickListener{
-            ejecutarTarea(viewModel,MethodRequest.POST.meth, 1,viewModel.userImage.value!!.toString(),viewModel.user.value?._id,viewModel.userImage.value!!)
+            if(viewModel.userImage.value?.path!=null)
+                subirFoto(this.requireContext(),viewModel)
+            MaterialAlertDialogBuilder(this.requireContext()).setTitle("Imagen Remplazada")
+                .setMessage("La imagen de perfil ha sido remplazada con exito")
+                .setPositiveButton("Ok"){dialog, which->}
+                .show()
         }
         bottnActu.setOnClickListener{
             if(passNewEdit?.text.toString().equals(passConfirmEdit?.text.toString())){
@@ -150,14 +159,15 @@ class Perfil : Fragment() {
             }
         }
         bottnMisArt.setOnClickListener{
+            var arguments = Bundle()
+            arguments.putString("userId",viewModel.user.value!!._id)
             var fragment = Inicio()
+            fragment.arguments=arguments
             var transaction:FragmentTransaction = parentFragmentManager.beginTransaction();
             transaction.replace(R.id.fragmentContainer,fragment)
             transaction.addToBackStack("Mis Articulos")
             transaction.commit()
         }
-
-
         //Return zone
         return root
     }
@@ -182,6 +192,15 @@ class Perfil : Fragment() {
             }
     }
 
+    fun subirFoto(context: Context,viewModel:PerfilViewModel){
+        var path=getPathFromUri(context,viewModel.userImage.value!!)
+        var file = File(path)
+        lifecycleScope.launch {
+            var responses= UserImagesResponses()
+            var data = responses.postUserImage(file,viewModel.user?.value?._id!!)
+            Log.i("Retrofit uploadImage",data.toString())
+        }
+    }
     fun ejecutarTarea(viewModel:PerfilViewModel,method: Int,service:Int,params:String,userId: String?,uri:Uri?){
         if(task?.status== Constant.Status.RUNNING){
             task?.cancel(true)
@@ -195,8 +214,15 @@ class Perfil : Fragment() {
         intent.setType("image/*");
         fileChooserResult.launch(intent)
     }
+    fun eliminarFoto(user:String){
+        lifecycleScope.launch {
+            var responses= UserImagesResponses()
+            var data = responses.deleteUserImage(user)
+            Log.i("Retrofit uploadImage",data.toString())
+        }
+    }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+    /*override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         when(resultCode){
             10->if(requestCode==RESULT_OK){
@@ -204,7 +230,7 @@ class Perfil : Fragment() {
                 Log.i("FileChooser",path)
             }
         }
-    }
+    }*/
     inner class PerfilAsyncTask(
         private var parametros:String,
         private var method:Int,
