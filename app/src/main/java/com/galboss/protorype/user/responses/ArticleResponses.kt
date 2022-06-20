@@ -33,4 +33,9 @@ class ArticleResponses {
         var articleData = id.toRequestBody("text/plain".toMediaTypeOrNull())
         return RetrofitInstance.api.uploadArticleImage(articleData,multi)
     }
+
+    suspend fun getArticleByUser(user:String):Response<ArrayList<Article>>{
+        return RetrofitInstance.api.getArticlesByUser(user);
+    }
+
 }

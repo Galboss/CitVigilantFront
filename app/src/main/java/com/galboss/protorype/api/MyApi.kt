@@ -18,6 +18,11 @@ interface MyApi {
         @Body article: Article
     ):Response<MessageResponse>
 
+    @GET("article/findByUser/{user}")
+    suspend fun getArticlesByUser(
+        @Path("user") user:String
+    ):Response<ArrayList<Article>>
+
     @GET("commentary/{article}")
     suspend fun getCommentaryWithUsers(
         @Path("article") article:String

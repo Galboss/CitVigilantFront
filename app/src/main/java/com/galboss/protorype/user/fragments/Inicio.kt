@@ -13,6 +13,7 @@ import android.widget.ArrayAdapter
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -25,10 +26,12 @@ import com.galboss.protorype.user.reciclerAdapters.ListaArticulosAdapter
 import com.galboss.protorype.task.CoroutinesAsyncTask
 import com.galboss.protorype.task.httpRequestGet
 import com.galboss.protorype.task.httpRequestGetWithBody
+import com.galboss.protorype.user.responses.ArticleResponses
 import com.galboss.protorype.utils.SwipeHelperCallback
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import it.xabaras.android.recyclerview.swipedecorator.RecyclerViewSwipeDecorator
+import kotlinx.coroutines.launch
 
 
 // TODO: Rename parameter arguments, choose names that match
@@ -82,7 +85,9 @@ class Inicio : Fragment() {
     override fun onAttach(context: Context) {
         super.onAttach(context)
         viewModel = ViewModelProvider(this).get(InicioViewModel::class.java)
-        ejecutarTarea(MethodRequest.GET.METH,1,"",null,null)
+        var extas = arguments
+        if(extas==null)
+            ejecutarTarea(MethodRequest.GET.METH,1,"",null,null)
         ejecutarTarea(MethodRequest.GET.METH,2,"",null,null)
     }
 
@@ -170,7 +175,8 @@ class Inicio : Fragment() {
         }
         //viewModel Observers
         viewModel.list.observe(this.viewLifecycleOwner, Observer {
-            adapter.setList(it)
+            adapter.setList(viewModel.list.value!!)
+            var adapter  = ListaArticulosAdapter(it,inflater,binding.root.context,this.parentFragmentManager)
             recycler.adapter=adapter
         })
         viewModel.provincias.observe(this.viewLifecycleOwner, Observer {
@@ -188,6 +194,11 @@ class Inicio : Fragment() {
             distAdapter = ArrayAdapter<String>(this.requireContext(),R.layout.spinner_item,R.id.text_item_display,dist)
             spinnerDist.setAdapter(distAdapter)
         })
+        //Llamado de la lista de objetos
+        var userId = extras?.getString("userId")
+        if(!userId.isNullOrEmpty()){
+            getArticlesById(userId)
+        }
         return binding.root
     }
 
@@ -196,6 +207,15 @@ class Inicio : Fragment() {
             task?.cancel(true)
         task= InicioAsyncTask(meth,serv,params,viewModel,provincia,canton)
         task?.execute()
+    }
+
+    fun getArticlesById(userId:String){
+        lifecycleScope.launch {
+            var responses = ArticleResponses()
+            var data = responses.getArticleByUser(userId)
+            viewModel.setList(data.body()!!.toMutableList())
+            Log.i("Retrofit article list","${data.body()!!}")
+        }
     }
 
     class InicioAsyncTask(

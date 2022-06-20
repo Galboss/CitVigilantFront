@@ -130,7 +130,7 @@ class Perfil : Fragment() {
             userNameEdit?.setText(viewModel.user.value?.userName)
             emailEdit?.setText(viewModel.user.value?.email)
             passOldEdit?.setText(viewModel.user.value?.password)
-            Picasso.get().load("http:192.168.0.143:3000/api/images/user/file/${user?._id}").into(imageView)
+            Picasso.get().load("https://citvigilant.herokuapp.com/api/images/user/file/${user?._id}").into(imageView)
         })
         viewModel.userImage.observe(this.viewLifecycleOwner, Observer {
             Picasso.get().load(viewModel.userImage.value.toString()).into(imageView)
@@ -149,7 +149,9 @@ class Perfil : Fragment() {
                 .show()
         }
         bottnActu.setOnClickListener{
-            if(passNewEdit?.text.toString().equals(passConfirmEdit?.text.toString())){
+            if(passNewEdit?.text.toString().equals(passConfirmEdit?.text.toString())
+                &&!userNameEdit?.text.toString().isNullOrEmpty()
+                &&!emailEdit?.text.toString().isNullOrEmpty()){
                 var user = viewModel.user.value
                 user?.password=passNewEdit?.editableText.toString()
                 user?.email=emailEdit?.editableText.toString()
@@ -157,6 +159,15 @@ class Perfil : Fragment() {
                 viewModel.setUser(user!!)
                 var data = gson.toJson(viewModel.user.value).toString()
                 ejecutarTarea(viewModel,MethodRequest.PATCH.meth,1,data,null,null)
+                MaterialAlertDialogBuilder(this.requireContext()).setTitle("Perfíl actualizado")
+                    .setMessage("La información de su perfíl ha sido actualizada")
+                    .setPositiveButton("Ok"){dialog, which->}
+                    .show()
+            }else{
+                MaterialAlertDialogBuilder(this.requireContext()).setTitle("Error")
+                    .setMessage("Verifique que ambas contraseñas coincidan")
+                    .setPositiveButton("Ok"){dialog, which->}
+                    .show()
             }
         }
         bottnMisArt.setOnClickListener{
@@ -214,12 +225,14 @@ class Perfil : Fragment() {
         task = PerfilAsyncTask(params!!,method,service,this.requireContext(),userId,uri,viewModel)
         task?.execute()
     }
+
     fun fileChooser(){
         var intent = Intent(Intent.ACTION_OPEN_DOCUMENT,MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
         intent.addCategory(Intent.CATEGORY_OPENABLE)
         intent.setType("image/*");
         fileChooserResult.launch(intent)
     }
+
     fun eliminarFoto(user:String){
         lifecycleScope.launch {
             var responses= UserImagesResponses()
