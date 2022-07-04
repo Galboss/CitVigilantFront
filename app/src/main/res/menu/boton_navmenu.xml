@@ -5,8 +5,8 @@
     <item android:title="Inicio"
         android:icon="@drawable/ic_baseline_home_24"
         android:id="@+id/menu_inicio"/>
-    <item android:title="Buscar"
-        android:icon="@drawable/ic_baseline_search_24"
+    <item android:title="Mis Articulos"
+        android:icon="@drawable/ic_baseline_comment_bank_24"
         android:id="@+id/menu_buscar"/>
     <item android:title="Crear"
         android:icon="@drawable/ic_baseline_post_add_24"

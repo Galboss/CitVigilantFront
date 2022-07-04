@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.os.Environment
 import android.provider.MediaStore
 import android.util.Log
 import androidx.fragment.app.Fragment
@@ -40,6 +41,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.io.File
+import java.io.FileOutputStream
 import java.lang.IllegalArgumentException
 import java.lang.StringBuilder
 
@@ -93,17 +95,17 @@ class Crear : Fragment() {
 
         fileChooserResult = registerForActivityResult(ActivityResultContracts.StartActivityForResult() ){ result->
             if(result.resultCode==Activity.RESULT_OK){
-                var images: ArrayList<String> = arrayListOf()
+                var images: ArrayList<Uri> = arrayListOf()
                 var dat = result.data
                 if(dat?.clipData!=null){
                     val count = dat.clipData?.itemCount?:0
                     //multiples imagenes
                     for(i in 0 until count){
-                        images.add(UriUtils.getPathFromUri(this.requireContext(),dat.clipData?.getItemAt(i)?.uri))
+                        images.add(dat.clipData?.getItemAt(i)?.uri!!)
                     }
                 }else if(dat?.data!=null){
                     //Cuando solo viene una unica imagen
-                    images.add(UriUtils.getPathFromUri(this.requireContext(),dat.data))
+                    images.add(dat.data!!)
                 }
                 Log.i("Galeria de imagenes","${images.toString()}")
                 viewModel.setImages(images)
@@ -294,12 +296,28 @@ class Crear : Fragment() {
         fileChooserResult.launch(intent)
     }
 
+    fun createImageFile(context: Context,filename: String):File{
+        var storageDir = context.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
+        return File.createTempFile("${filename}","jpg",storageDir)
+    }
+    fun uriToFile(context: Context,uri:Uri,filename:String):File?{
+        context.contentResolver.openInputStream(uri)?.let { inputStream ->
+            val tempFile:File = createImageFile(context,filename)
+            val fileOutputStream = FileOutputStream(tempFile)
+            inputStream.copyTo(fileOutputStream)
+            inputStream.close()
+            fileOutputStream.close()
+            return tempFile
+        }
+        return null
+    }
+
     fun uploadImagesToServer(){
         var count = viewModel.images.value!!.count()
         for (i in 0 until count){
             lifecycleScope.launch {
                 var responses= ArticleResponses()
-                var file = File(viewModel.images.value!!.get(i))
+                var file = uriToFile(requireContext(),viewModel.images.value!!.get(i)!!,viewModel.article.value!!._id!!)!!
                 var id = viewModel.article.value!!._id
                 var data = responses.uploadImage(file,id!!)
             }

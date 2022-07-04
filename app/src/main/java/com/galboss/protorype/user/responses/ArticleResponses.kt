@@ -1,10 +1,7 @@
 package com.galboss.protorype.user.responses
 
 
-import com.galboss.protorype.model.entities.Article
-import com.galboss.protorype.model.entities.Commentary
-import com.galboss.protorype.model.entities.CommentaryWithUser
-import com.galboss.protorype.model.entities.MessageResponse
+import com.galboss.protorype.model.entities.*
 import com.galboss.protorype.utils.RetrofitInstance
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
@@ -38,4 +35,15 @@ class ArticleResponses {
         return RetrofitInstance.api.getArticlesByUser(user);
     }
 
+    suspend fun deleteArticleById(articleId:String):Response<MessageResponse>{
+        return RetrofitInstance.api.deleteArticleById(articleId)
+    }
+
+    suspend fun articlePost(article: Article):Response<Article>{
+        return RetrofitInstance.api.postArticle(article)
+    }
+
+    suspend fun getGalleryImagesByArticle(articleId:String): Response<ArrayList<ArticleGalleryItem>>{
+        return RetrofitInstance.api.getImageGalleryByArticle(articleId)
+    }
 }

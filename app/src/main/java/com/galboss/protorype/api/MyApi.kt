@@ -18,6 +18,16 @@ interface MyApi {
         @Body article: Article
     ):Response<MessageResponse>
 
+    @POST("article/")
+    suspend fun postArticle(
+        @Body article: Article
+    ):Response<Article>
+
+    @DELETE("article/{id}")
+    suspend fun deleteArticleById(
+        @Path("id") articleId:String
+    ):Response<MessageResponse>
+
     @GET("article/findByUser/{user}")
     suspend fun getArticlesByUser(
         @Path("user") user:String
@@ -51,6 +61,11 @@ interface MyApi {
         @Part("user") user: RequestBody,
         @Part file: MultipartBody.Part
     ):Response<MessageResponse>
+
+    @GET("images/article/gallery/{article}")
+    suspend fun getImageGalleryByArticle(
+        @Path("article") articleId: String
+    ):Response<ArrayList<ArticleGalleryItem>>
 
     @Multipart
     @POST("images/article")

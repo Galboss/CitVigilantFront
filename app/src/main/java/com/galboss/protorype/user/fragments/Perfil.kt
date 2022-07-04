@@ -3,9 +3,14 @@ package com.galboss.protorype.user.fragments
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.database.Cursor
+import android.graphics.Bitmap
+import android.graphics.ImageDecoder
 import android.net.Uri
 import android.os.Bundle
+import android.os.Environment
 import android.provider.MediaStore
+import android.provider.MediaStore.Images
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -22,18 +27,21 @@ import com.galboss.protorype.Loggin_Register_Activity
 import com.galboss.protorype.MainActivity
 import com.galboss.protorype.R
 import com.galboss.protorype.databinding.FragmentPerfilBinding
-import com.galboss.protorype.user.fragments.viewModels.PerfilViewModel
 import com.galboss.protorype.model.Constant
 import com.galboss.protorype.model.entities.User
 import com.galboss.protorype.task.*
+import com.galboss.protorype.user.fragments.viewModels.PerfilViewModel
 import com.galboss.protorype.user.responses.UserImagesResponses
+import com.galboss.protorype.utils.URIPathHelper
 import com.galboss.protorype.utils.UriUtils.getPathFromUri
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.squareup.picasso.Picasso
 import kotlinx.coroutines.launch
+import java.io.ByteArrayOutputStream
 import java.io.File
+import java.io.FileOutputStream
 
 
 // TODO: Rename parameter arguments, choose names that match
@@ -94,6 +102,21 @@ class Perfil : Fragment() {
         }
     }
 
+    fun createImageFile(context: Context,filename: String):File{
+        var storageDir = context.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
+        return File.createTempFile("${filename}","jpg",storageDir)
+    }
+    fun uriToFile(context: Context,uri:Uri,filename:String):File?{
+        context.contentResolver.openInputStream(uri)?.let { inputStream ->
+            val tempFile:File = createImageFile(context,filename)
+            val fileOutputStream = FileOutputStream(tempFile)
+            inputStream.copyTo(fileOutputStream)
+            inputStream.close()
+            fileOutputStream.close()
+            return tempFile
+        }
+        return null
+    }
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -211,11 +234,15 @@ class Perfil : Fragment() {
 
     fun subirFoto(context: Context,viewModel:PerfilViewModel){
         var path=getPathFromUri(context,viewModel.userImage.value!!)
-        var file = File(path)
-        lifecycleScope.launch {
-            var responses= UserImagesResponses()
-            var data = responses.postUserImage(file,viewModel.user?.value?._id!!)
-            Log.i("Retrofit uploadImage",data.toString())
+        Log.i("URL interna","${viewModel.userImage.value!!.path}")
+        Log.i("URL interna","${path}")
+        var file = uriToFile(context,viewModel.userImage.value!!,viewModel.user.value!!._id!!)
+        if(file!=null) {
+            lifecycleScope.launch {
+                var responses = UserImagesResponses()
+                var data = responses.postUserImage(file, viewModel.user?.value?._id!!)
+                Log.i("Retrofit uploadImage", data.toString())
+            }
         }
     }
     fun ejecutarTarea(viewModel:PerfilViewModel,method: Int,service:Int,params:String,userId: String?,uri:Uri?){
@@ -239,6 +266,20 @@ class Perfil : Fragment() {
             var data = responses.deleteUserImage(user)
             Log.i("Retrofit uploadImage",data.toString())
         }
+    }
+
+    fun getImageUri(inContext: Context, inImage: Bitmap): Uri? {
+        val bytes = ByteArrayOutputStream()
+        inImage.compress(Bitmap.CompressFormat.JPEG, 100, bytes)
+        val path = Images.Media.insertImage(inContext.contentResolver, inImage, "Title", null)
+        return Uri.parse(path)
+    }
+
+    fun getRealPathFromURI(uri: Uri?,context: Context): String? {
+        val cursor: Cursor = context.contentResolver.query(uri!!, null, null, null, null)!!
+        cursor.moveToFirst()
+        val idx: Int = cursor.getColumnIndex(Images.ImageColumns.DATA)
+        return cursor.getString(idx)
     }
 
     /*override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

@@ -10,3 +10,4 @@ data class User(
     var canton:Int?,
     var distrito:Int?
 )
+

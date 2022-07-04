@@ -1,5 +1,6 @@
 package com.galboss.protorype.user.fragments.viewModels
 
+import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -22,7 +23,7 @@ class ArticleViewModel: ViewModel(){
     var cantones = _cantones
     private val _distritos = MutableLiveData<List<String>>().apply { value = listOf() }
     var distritos = _distritos
-    private val _images = MutableLiveData<ArrayList<String>>().apply { value= arrayListOf() }
+    private val _images = MutableLiveData<ArrayList<Uri>>().apply { value= arrayListOf() }
     var images = _images
 
     fun setProvincias(new:List<String>){
@@ -42,7 +43,7 @@ class ArticleViewModel: ViewModel(){
         this.article = _article
     }
 
-    fun setImages(im:ArrayList<String>){
+    fun setImages(im:ArrayList<Uri>){
         _images.value=im
         images=_images
     }

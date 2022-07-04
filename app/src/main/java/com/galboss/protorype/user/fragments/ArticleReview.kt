@@ -21,6 +21,7 @@ import com.galboss.protorype.databinding.FragmentArticleReviewBinding
 import com.galboss.protorype.model.entities.Commentary
 import com.galboss.protorype.model.entities.CommentaryWithUser
 import com.galboss.protorype.user.fragments.viewModels.ArticleDisplayViewModel
+import com.galboss.protorype.user.reciclerAdapters.ImageGalleryAdapter
 import com.galboss.protorype.user.reciclerAdapters.ListaComentariosAdapter
 import com.galboss.protorype.user.responses.ArticleResponses
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -75,6 +76,9 @@ class ArticleReview : Fragment() {
         var articleContent = binding.articleContent
         var articleStatus = binding.articleStatus
         var articleImagesContainer = binding.articleImagesContainer
+        articleImagesContainer.layoutManager=LinearLayoutManager(articleImagesContainer.context)
+        var galleryRecycler = ImageGalleryAdapter(arrayListOf(),inflater,binding.root.context)
+        articleImagesContainer.adapter = galleryRecycler
         var articleComentaryBox = binding.articleComentaryBox
         var articleRecycleListCommentary= binding.articleComentaryList
         var buttnPublis = binding.articleBtnPublish
@@ -101,6 +105,11 @@ class ArticleReview : Fragment() {
                         articleStatus.setTextColor(Color.GREEN)
                     }
                 }
+            }
+        })
+        viewModel.gallery.observe(this.viewLifecycleOwner, Observer {
+            if(viewModel.gallery.value?.size!=0){
+                galleryRecycler.setItems(viewModel.gallery?.value!!)
             }
         })
         //call article data request
@@ -133,6 +142,7 @@ class ArticleReview : Fragment() {
                     .show()
             }
         }
+        getGalleryImageByArticle(extras?.getString("articleId")!!)
         // Inflate the layout for this fragment
         return binding.root
     }
@@ -157,6 +167,17 @@ class ArticleReview : Fragment() {
             var data = responses.postCommentary(comm)
         }
     }
+
+    fun getGalleryImageByArticle(articleId:String){
+        lifecycleScope.launch {
+            var responses = ArticleResponses()
+            var data= responses.getGalleryImagesByArticle(articleId)
+            if(data.body()!=null)
+                viewModel.setGallery(data.body()!!)
+        }
+    }
+
+
     companion object {
         /**
          * Use this factory method to create a new instance of

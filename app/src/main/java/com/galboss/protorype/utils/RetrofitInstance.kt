@@ -8,7 +8,7 @@ import retrofit2.create
 object RetrofitInstance {
 
     private val retrofit by lazy{
-        Retrofit.Builder().baseUrl("http://192.168.0.143:3000/api/")
+        Retrofit.Builder().baseUrl("https://citvigilant.herokuapp.com/api/")
             .addConverterFactory(GsonConverterFactory.create())
             .build()
     }

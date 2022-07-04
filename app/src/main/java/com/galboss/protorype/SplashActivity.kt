@@ -18,6 +18,7 @@ class SplashActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_splash)
+
         var image = findViewById<ImageView>(R.id.splash_icon)
         //scalateImage(image,this)
         supportActionBar?.hide()

@@ -23,10 +23,17 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         val menu:BottomNavigationView = this.findViewById(R.id.navigationBar)
         val fragmentContainer:FrameLayout=this.findViewById(R.id.fragmentContainer)
+        var extras= this.intent
         menu.setOnItemSelectedListener { item: MenuItem? ->
             when (item?.itemId) {
                 R.id.menu_perfil->replaceFragment(Perfil())
-                R.id.menu_buscar->replaceFragment(Buscar())
+                R.id.menu_buscar->{
+                    var inicio = Inicio()
+                    var extras2 = Bundle()
+                    extras2.putString("userId",extras.getStringExtra("userId"))
+                    inicio.arguments=extras2
+                    replaceFragment(inicio)
+                }
                 R.id.menu_inicio->replaceFragment(Inicio())
                 R.id.menu_agregar->replaceFragment(Crear())
                 R.id.menu_acerca->replaceFragment(Acerca())
@@ -37,7 +44,6 @@ class MainActivity : AppCompatActivity() {
         viewModelAc.userActivity.observe(this, Observer {
 
         })
-        var extras= this.intent
         ejecutarTarea(viewModelAc,1,1,extras.getStringExtra("userId"))
 
     }

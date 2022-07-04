@@ -124,6 +124,8 @@ class Inicio : Fragment() {
                     when(direction){
                         ItemTouchHelper.RIGHT->{
                             adapter.deleteItem(viewHolder.bindingAdapterPosition)
+                            //var toDelete  = viewModel.list.value!!.get(viewHolder.bindingAdapterPosition)
+                            //deleteArticleById(toDelete._id!!)
                         }
                         ItemTouchHelper.LEFT->{
                             var itemEdit = viewModel.list.value!!.get(viewHolder.bindingAdapterPosition)
@@ -176,8 +178,6 @@ class Inicio : Fragment() {
         //viewModel Observers
         viewModel.list.observe(this.viewLifecycleOwner, Observer {
             adapter.setList(viewModel.list.value!!)
-            var adapter  = ListaArticulosAdapter(it,inflater,binding.root.context,this.parentFragmentManager)
-            recycler.adapter=adapter
         })
         viewModel.provincias.observe(this.viewLifecycleOwner, Observer {
             var prov:Array<String> = viewModel.provincias.value!!.toTypedArray()
@@ -215,6 +215,14 @@ class Inicio : Fragment() {
             var data = responses.getArticleByUser(userId)
             viewModel.setList(data.body()!!.toMutableList())
             Log.i("Retrofit article list","${data.body()!!}")
+        }
+    }
+
+    fun deleteArticleById(articleId:String){
+        lifecycleScope.launch {
+            var responses = ArticleResponses()
+            var data = responses.deleteArticleById(articleId)
+            Log.i("Delete demo","${data.body()!!.toString()}")
         }
     }
 

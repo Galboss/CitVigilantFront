@@ -11,13 +11,19 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.cardview.widget.CardView
 import androidx.fragment.app.FragmentManager
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
 import androidx.transition.FragmentTransitionSupport
 import com.galboss.protorype.R
 import com.galboss.protorype.model.entities.Article
 import com.galboss.protorype.user.fragments.ArticleReview
 import com.galboss.protorype.user.fragments.viewModels.InicioViewModel
+import com.galboss.protorype.user.responses.ArticleResponses
 import com.google.android.material.snackbar.Snackbar
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 import java.lang.StringBuilder
 
 class ListaArticulosAdapter(
@@ -29,11 +35,12 @@ class ListaArticulosAdapter(
 
     var itemDeletedPosition:Int=0
     var itemDeleted:Article?=null
-    var viewHold:ViewHolder?=null
+    var root:ViewHolder?=null
+    val scope= CoroutineScope(Dispatchers.Default+ Job())
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.list_article_item,parent,false)
-        viewHold=ViewHolder(view)
+        root = ViewHolder(view)
         return ViewHolder(view)
     }
 
@@ -69,12 +76,29 @@ class ListaArticulosAdapter(
         list.removeAt(position)
         nData=list.toList()
         notifyItemRemoved(position)
+        deleteArticleById(itemDeleted!!._id!!)
         Log.i("Position Save","${position},${itemDeletedPosition}")
-        Snackbar.make(viewHold!!.itemView,"Articulo Eliminado",Snackbar.LENGTH_LONG).setAction("Deshacer"){
+        Snackbar.make(root!!.itemView,"Articulo Eliminado",Snackbar.LENGTH_LONG).setAction("Deshacer"){
+            Log.i("On Snackbar","${itemDeleted}")
             list.add(itemDeletedPosition,itemDeleted!!)
             nData=list.toList()
             notifyItemInserted(itemDeletedPosition)
+            postArticle(itemDeleted!!)
         }.show()
+    }
+
+    fun postArticle(article: Article){
+        scope.launch {
+            var responses = ArticleResponses()
+            var data = responses.articlePost(itemDeleted!!)
+        }
+    }
+
+    fun deleteArticleById(articleId:String){
+        scope.launch {
+            var responses = ArticleResponses()
+            var data = responses.deleteArticleById(articleId)
+        }
     }
 
     fun getList():List<Article>{ return nData }
